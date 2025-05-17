@@ -6,7 +6,7 @@ wip.md
 slides/brutos/*.html
 *.db
 *.bd
-
+.idea
 ### Python ###
 # Byte-compiled / optimized / DLL files
 __pycache__/
