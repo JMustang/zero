@@ -5,15 +5,17 @@ class Message(BaseModel):
     Message: str
 
 
-class UserSchema(BaseModel):
-    username: str
-    email: EmailStr
-    password: str
-
-
 class UserPublicSchema(BaseModel):
     username: str
     email: EmailStr
 
     class Config:
         orm_mode = True
+
+
+class UserSchema(UserPublicSchema):
+    password: str
+
+
+class UserDB(UserSchema):
+    id: int
