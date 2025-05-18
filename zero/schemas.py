@@ -8,6 +8,7 @@ class Message(BaseModel):
 class UserPublicSchema(BaseModel):
     username: str
     email: EmailStr
+    id: int
 
     class Config:
         orm_mode = True
