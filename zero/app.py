@@ -16,7 +16,7 @@ app = FastAPI(
 
 @app.get('/', status_code=HTTPStatus.OK, response_model=Message)
 def read():
-    return {'msg': 'Test API'}
+    return {'message': 'Test API'}
 
 
 @app.post('/users/', status_code=HTTPStatus.CREATED, response_model=UserPublicSchema)
