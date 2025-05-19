@@ -7,6 +7,25 @@ from zero.app import app
 
 def test_app():
     client = TestClient(app)
-    response = client.get('/')
+
+    # Act
+    response = client.get("/")
+
+    # Assert
+    assert response.json() == {"message": "Test API"}
     assert response.status_code == HTTPStatus.OK
-    assert response.json() == {'msg': 'Test API'}
+
+
+def test_create_user():
+    client = TestClient(app)
+    response = client.post(
+        "/users/",
+        json={"username": "alice", "email": "alice@exemple.com", "password": "secret"},
+    )
+
+    assert response.status_code == HTTPStatus.CREATED
+    assert response.json() == {
+        "id": 1,
+        "username": "alice",
+        "email": "alice@exemple.com",
+    }
