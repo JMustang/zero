@@ -20,7 +20,7 @@ taskipy = "^1.14.1"
 
 
 [tool.ruff]
-line-length = 85
+line-length = 90
 extend-exclude = ['migrations']
 
 [tool.ruff.lint]
