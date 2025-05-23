@@ -13,14 +13,14 @@ def test_app(client):
 def test_create_user(client):
     response = client.post(
         '/users/',
-        json={'username': 'alice', 'email': 'alice@exemple.com', 'password': 'secret'},
+        json={'username': 'alice', 'email': 'alice@example.com', 'password': 'secret'},
     )
 
     assert response.status_code == HTTPStatus.CREATED
     assert response.json() == {
         'id': 1,
         'username': 'alice',
-        'email': 'alice@exemple.com',
+        'email': 'alice@example.com',
     }
 
 
@@ -31,7 +31,17 @@ def test_read_users(client):
     # Assert
     assert response.status_code == HTTPStatus.OK
     assert response.json() == {
-        'users': [{'username': 'alice', 'email': 'alice@exemple.com', 'id': 1}]
+        'users': [{'username': 'alice', 'email': 'alice@example.com', 'id': 1}]
+    }
+
+
+def test_get_user_by_id(client):
+    response = client.get('/users/1')
+    assert response.status_code == HTTPStatus.OK
+    assert response.json() == {
+        'username': 'alice',
+        'email': 'alice@example.com',
+        'id': 1,
     }
 
 
