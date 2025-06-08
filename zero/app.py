@@ -67,21 +67,28 @@ def get_user_by_id(user_id: int, session: Session = Depends(get_session)):
 
 
 @app.put("/users/{user_id}", status_code=HTTPStatus.OK, response_model=UserPublicSchema)
-def update_user(user_id: int, user: UserSchema):
-    user_with_id = UserDB(**user.model_dump(), id=user_id)
-
-    if user_id < 1 or user_id > len(database):
+def update_user(
+    user_id: int, user: UserSchema, session: Session = Depends(get_session)
+):
+    user_db = session.scalar(select(User).where(User.id == user_id))
+    if not user_db:
         raise HTTPException(
             status_code=HTTPStatus.NOT_FOUND, detail="❌ User not found!"
         )
-    database[user_id - 1] = user_with_id
-    return user_with_id
+    user_db.username = user.username
+    user_db.password = user.password
+    user_db.email = user.email
+    session.add(user_db)
+    session.commit()
+    session.refresh(user_db)
+
+    return user_db
 
 
 @app.delete("/users/{user_id}", status_code=HTTPStatus.NO_CONTENT)
-def delete_user(user_id: int):
-    if user_id < 1 or user_id > len(database):
+def delete_user(user_id: int, session: Session = Depends(get_session)):
+    user_db = session.scalar(select(User).where(User.id == user_id))
+    if not user_db:
         raise HTTPException(
             status_code=HTTPStatus.NOT_FOUND, detail="❌ User not found!"
         )
-    del database[user_id - 1]
