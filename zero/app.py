@@ -8,9 +8,6 @@ from zero.database import get_session
 from zero.models import User
 from zero.schemas import Message, UserList, UserPublicSchema, UserSchema
 
-# Banco local para testes
-database = []
-
 app = FastAPI(
     title='Test for Zero API',
     description='Treinamento com python e FastAPI. Ministrado por dunossauro',
@@ -57,7 +54,7 @@ def get_user_by_id(user_id: int, session: Session = Depends(get_session)):
     db_user = session.scalar(select(User).where(User.id == user_id))
 
     if not db_user:
-        raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail='User not found')
+        raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail='❌ User not found!')
 
     return db_user
 
