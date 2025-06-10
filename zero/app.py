@@ -2,6 +2,7 @@ from http import HTTPStatus
 
 from fastapi import Depends, FastAPI, HTTPException
 from sqlalchemy import select
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from zero.database import get_session
@@ -74,14 +75,26 @@ def update_user(
         raise HTTPException(
             status_code=HTTPStatus.NOT_FOUND, detail="❌ User not found!"
         )
-    user_db.username = user.username
-    user_db.password = user.password
-    user_db.email = user.email
-    session.add(user_db)
-    session.commit()
-    session.refresh(user_db)
 
-    return user_db
+    try:
+        user_db.username = user.username
+        user_db.password = user.password
+        user_db.email = user.email
+        session.add(user_db)
+        session.commit()
+        session.refresh(user_db)
+        return user_db
+    except IntegrityError as e:
+        session.rollback()
+        if "UNIQUE constraint failed" in str(e):
+            raise HTTPException(
+                status_code=HTTPStatus.CONFLICT,
+                detail="❌ Username of Email already exists!",
+            )
+        raise HTTPException(
+            status_code=HTTPStatus.INTERNAL_SERVER_ERROR,
+            detail="❌ An error occurred while updating the user.",
+        )
 
 
 @app.delete("/users/{user_id}", status_code=HTTPStatus.NO_CONTENT)
