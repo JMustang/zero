@@ -77,6 +77,29 @@ def test_update_user(client, user):
     }
 
 
+def test_update_integrity_error(client, user):
+    client.post(
+        '/users',
+        json={
+            'username': 'fausto',
+            'email': 'fausto@exemplo.com',
+            'password': 'secret',
+        },
+    )
+
+    resopnse_update = client.put(
+        f'/users/{user.id}',
+        json={
+            'username': 'fausto',
+            'email': 'bob@exemplo.com',
+            'password': 'mynewpassword',
+        },
+    )
+
+    assert resopnse_update.status_code == HTTPStatus.CONFLICT
+    assert resopnse_update.json() == {'detail': '❌ Username already exists!'}
+
+
 def test_update_user_not_found(client):
     response = client.put(
         '/users/2',
