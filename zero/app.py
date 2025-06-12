@@ -45,6 +45,21 @@ def create_user(user: UserSchema, session: Session = Depends(get_session)):
         username=user.username,
         password=get_password_hash(user.password),
     )
+    session.add(db_user)
+    try:
+        session.commit()
+        session.refresh(db_user)
+    except IntegrityError as e:
+        session.rollback()
+        if "UNIQUE constraint failed" in str(e):
+            raise HTTPException(
+                status_code=HTTPStatus.CONFLICT,
+                detail="❌ Username or Email already exists!",
+            )
+        raise HTTPException(
+            status_code=HTTPStatus.INTERNAL_SERVER_ERROR,
+            detail="❌ An error occurred while creating the user.",
+        )
 
     return db_user
 
