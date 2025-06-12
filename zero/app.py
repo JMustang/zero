@@ -8,6 +8,7 @@ from sqlalchemy.orm import Session
 from zero.database import get_session
 from zero.models import User
 from zero.schemas import Message, UserList, UserPublicSchema, UserSchema
+from zero.security import get_password_hash
 
 app = FastAPI(
     title="Test for Zero API",
@@ -38,10 +39,12 @@ def create_user(user: UserSchema, session: Session = Depends(get_session)):
             raise HTTPException(
                 status_code=HTTPStatus.CONFLICT, detail="❌ Email already exists!"
             )
-    db_user = User(**user.model_dump())
-    session.add(db_user)
-    session.commit()
-    session.refresh(db_user)
+
+    db_user = User(
+        email=user.email,
+        username=user.username,
+        password=get_password_hash(user.password),
+    )
 
     return db_user
 
@@ -78,7 +81,7 @@ def update_user(
 
     try:
         user_db.username = user.username
-        user_db.password = user.password
+        user_db.password = get_password_hash(user.password)
         user_db.email = user.email
         session.add(user_db)
         session.commit()
