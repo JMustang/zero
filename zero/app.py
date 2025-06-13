@@ -1,6 +1,7 @@
 from http import HTTPStatus
 
 from fastapi import Depends, FastAPI, HTTPException
+from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
@@ -8,7 +9,7 @@ from sqlalchemy.orm import Session
 from zero.database import get_session
 from zero.models import User
 from zero.schemas import Message, UserList, UserPublicSchema, UserSchema
-from zero.security import get_password_hash
+from zero.security import get_password_hash, verify_password
 
 app = FastAPI(
     title="Test for Zero API",
@@ -125,3 +126,21 @@ def delete_user(user_id: int, session: Session = Depends(get_session)):
     session.delete(user_db)
     session.commit()
     return {"message": "✅ User deleted successfully"}
+
+
+@app.post("/token")
+def login_for_access_token(
+    form_data: OAuth2PasswordRequestForm = Depends(),
+    session: Session = Depends(get_session),
+):
+    user = session.scalar(select(User).where(User.email == form_data.username))
+    if not user:
+        raise HTTPException(
+            status_code=HTTPStatus.UNAUTHORIZED,
+            detail="❌ Incorrect email or password",
+        )
+    if not verify_password(form_data.password, user.password):
+        raise HTTPException(
+            status_code=HTTPStatus.UNAUTHORIZED,
+            detail="❌ Incorrect email or password",
+        )
