@@ -8,7 +8,7 @@ from sqlalchemy.orm import Session
 
 from zero.database import get_session
 from zero.models import User
-from zero.schemas import Message, UserList, UserPublicSchema, UserSchema
+from zero.schemas import Message, Token, UserList, UserPublicSchema, UserSchema
 from zero.security import get_password_hash, verify_password
 
 app = FastAPI(
@@ -128,7 +128,7 @@ def delete_user(user_id: int, session: Session = Depends(get_session)):
     return {"message": "✅ User deleted successfully"}
 
 
-@app.post("/token")
+@app.post("/token", response_model=Token)
 def login_for_access_token(
     form_data: OAuth2PasswordRequestForm = Depends(),
     session: Session = Depends(get_session),
