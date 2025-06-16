@@ -1,5 +1,7 @@
 # Estudando backend com dunossauro
 
+![FastAPI LOGO](FastAPI.png)
+
 Este projeto utiliza FastAPI para criação de uma API backend moderna e rápida. Abaixo estão as principais ferramentas utilizadas no desenvolvimento:
 
 ## Ferramentas
