@@ -15,7 +15,7 @@ class UserPublicSchema(BaseModel):
     id: int
     username: str
     email: EmailStr
-    model_config = ConfigDict(from_attributes=True, extra='forbid')
+    model_config = ConfigDict(from_attributes=True, extra="forbid")
 
 
 class UserList(BaseModel):
@@ -23,5 +23,5 @@ class UserList(BaseModel):
 
 
 class Token(BaseModel):
-    access_toke: str
+    access_token: str
     token_type: str
