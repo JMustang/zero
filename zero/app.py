@@ -17,33 +17,31 @@ from zero.security import (
 )
 
 app = FastAPI(
-    title="Test for Zero API",
-    description="Treinamento com python e FastAPI. Ministrado por dunossauro",
-    version="0.1.0",
+    title='Test for Zero API',
+    description='Treinamento com python e FastAPI. Ministrado por dunossauro',
+    version='0.1.0',
 )
 
 
-@app.get("/", status_code=HTTPStatus.OK, response_model=Message)
+@app.get('/', status_code=HTTPStatus.OK, response_model=Message)
 def read():
-    return {"message": "Test API"}
+    return {'message': 'Test API'}
 
 
-@app.post("/users/", status_code=HTTPStatus.CREATED, response_model=UserPublicSchema)
+@app.post('/users/', status_code=HTTPStatus.CREATED, response_model=UserPublicSchema)
 def create_user(user: UserSchema, session: Session = Depends(get_session)):
     db_user = session.scalar(
-        select(User).where(
-            (User.username == user.username) | (User.email == user.email)
-        )
+        select(User).where((User.username == user.username) | (User.email == user.email))
     )
 
     if db_user:
         if db_user.username == user.username:
             raise HTTPException(
-                status_code=HTTPStatus.CONFLICT, detail="❌ Username already exists!"
+                status_code=HTTPStatus.CONFLICT, detail='❌ Username already exists!'
             )
         elif db_user.email == user.email:
             raise HTTPException(
-                status_code=HTTPStatus.CONFLICT, detail="❌ Email already exists!"
+                status_code=HTTPStatus.CONFLICT, detail='❌ Email already exists!'
             )
 
     db_user = User(
@@ -57,20 +55,20 @@ def create_user(user: UserSchema, session: Session = Depends(get_session)):
         session.refresh(db_user)
     except IntegrityError as e:
         session.rollback()
-        if "UNIQUE constraint failed" in str(e):
+        if 'UNIQUE constraint failed' in str(e):
             raise HTTPException(
                 status_code=HTTPStatus.CONFLICT,
-                detail="❌ Username or Email already exists!",
+                detail='❌ Username or Email already exists!',
             )
         raise HTTPException(
             status_code=HTTPStatus.INTERNAL_SERVER_ERROR,
-            detail="❌ An error occurred while creating the user.",
+            detail='❌ An error occurred while creating the user.',
         )
 
     return db_user
 
 
-@app.get("/users/", status_code=HTTPStatus.OK, response_model=UserList)
+@app.get('/users/', status_code=HTTPStatus.OK, response_model=UserList)
 def list_users(
     skip: int = 0,
     limit: int = 100,
@@ -78,22 +76,20 @@ def list_users(
     current_user=Depends(get_current_user),
 ):
     users = session.scalars(select(User).offset(skip).limit(limit)).all()
-    return {"users": users}
+    return {'users': users}
 
 
-@app.get("/users/{user_id}", status_code=HTTPStatus.OK, response_model=UserPublicSchema)
+@app.get('/users/{user_id}', status_code=HTTPStatus.OK, response_model=UserPublicSchema)
 def get_user_by_id(user_id: int, session: Session = Depends(get_session)):
     db_user = session.scalar(select(User).where(User.id == user_id))
 
     if not db_user:
-        raise HTTPException(
-            status_code=HTTPStatus.NOT_FOUND, detail="❌ User not found!"
-        )
+        raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail='❌ User not found!')
 
     return db_user
 
 
-@app.put("/users/{user_id}", status_code=HTTPStatus.OK, response_model=UserPublicSchema)
+@app.put('/users/{user_id}', status_code=HTTPStatus.OK, response_model=UserPublicSchema)
 def update_user(
     user_id: int,
     user: UserSchema,
@@ -103,7 +99,7 @@ def update_user(
     if current_user.id != user_id:
         raise HTTPException(
             status_code=HTTPStatus.FORBIDDEN,
-            detail="❌ You do not have permission to update this user.",
+            detail='❌ You do not have permission to update this user.',
         )
     try:
         current_user.username = user.username
@@ -115,18 +111,18 @@ def update_user(
         return current_user
     except IntegrityError as e:
         session.rollback()
-        if "UNIQUE constraint failed" in str(e):
+        if 'UNIQUE constraint failed' in str(e):
             raise HTTPException(
                 status_code=HTTPStatus.CONFLICT,
-                detail="❌ Username of Email already exists!",
+                detail='❌ Username of Email already exists!',
             )
         raise HTTPException(
             status_code=HTTPStatus.INTERNAL_SERVER_ERROR,
-            detail="❌ An error occurred while updating the user.",
+            detail='❌ An error occurred while updating the user.',
         )
 
 
-@app.delete("/users/{user_id}", status_code=HTTPStatus.NO_CONTENT)
+@app.delete('/users/{user_id}', status_code=HTTPStatus.NO_CONTENT)
 def delete_user(
     user_id: int,
     session: Session = Depends(get_session),
@@ -135,15 +131,15 @@ def delete_user(
     if current_user.id != user_id:
         raise HTTPException(
             status_code=HTTPStatus.FORBIDDEN,
-            detail="❌ You do not have permission to update this user.",
+            detail='❌ You do not have permission to update this user.',
         )
 
     session.delete(current_user)
     session.commit()
-    return {"message": "✅ User deleted successfully"}
+    return {'message': '✅ User deleted successfully'}
 
 
-@app.post("/token", response_model=Token)
+@app.post('/token', response_model=Token)
 def login_for_access_token(
     form_data: OAuth2PasswordRequestForm = Depends(),
     session: Session = Depends(get_session),
@@ -152,13 +148,13 @@ def login_for_access_token(
     if not user:
         raise HTTPException(
             status_code=HTTPStatus.UNAUTHORIZED,
-            detail="❌ Incorrect email or password",
+            detail='❌ Incorrect email or password',
         )
     if not verify_password(form_data.password, user.password):
         raise HTTPException(
             status_code=HTTPStatus.UNAUTHORIZED,
-            detail="❌ Incorrect email or password",
+            detail='❌ Incorrect email or password',
         )
 
-    access_token = create_access_token({"sub": user.email})
-    return {"access_token": access_token, "token_type": "Bearer"}
+    access_token = create_access_token({'sub': user.email})
+    return {'access_token': access_token, 'token_type': 'Bearer'}
