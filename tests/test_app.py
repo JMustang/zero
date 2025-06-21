@@ -102,16 +102,24 @@ def test_update_user_not_authorized(client, token):
     }
 
 
-def test_delete_user(client, user):
-    response = client.delete("/users/1")
+def test_delete_user(client, user, token):
+    response = client.delete(
+        "/users/1",
+        headers={"Authorization": f"Bearer {token}"},
+    )
     assert response.status_code == HTTPStatus.NO_CONTENT
     assert response.content == b""
 
 
-def test_delete_user_not_found(client):
-    response = client.delete("/users/2")
-    assert response.status_code == HTTPStatus.NOT_FOUND
-    assert response.json() == {"detail": "❌ User not found!"}
+def test_delete_user_not_found(client, token):
+    response = client.delete(
+        "/users/2",
+        headers={"Authorization": f"Bearer {token}"},
+    )
+    assert response.status_code == HTTPStatus.FORBIDDEN
+    assert response.json() == {
+        "detail": "❌ You do not have permission to update this user."
+    }
 
 
 def test_get_token(client, user):
